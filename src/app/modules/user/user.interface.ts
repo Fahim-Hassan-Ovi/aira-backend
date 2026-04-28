@@ -1,9 +1,9 @@
 import { Types } from "mongoose";
 
 export enum Role {
-    USER = "USER",
-    PROVIDER = "PROVIDER",
-    SUPER_ADMIN = "SUPER_ADMIN"
+    GUEST = "GUEST",
+    HOST = "HOST",
+    ADMIN = "ADMIN"
 }
 
 export enum IsActive {
@@ -22,33 +22,32 @@ export interface ICoord {
     lon: number;
 }
 
-export interface ISubscriptionInfo {
-    planName: "free" | "basic" | "pro" | "elite";
-    badgeType: "none" | "active" | "verified_pro" | "elite";
-    priorityScore: number;
-    isFeatured: boolean;
-    analyticsType: "none" | "basic" | "detailed";
-    hasHighlightedProfileBorder: boolean;
-}
-
 export interface IUser {
     _id?: Types.ObjectId;
     name: string;
     email: string;
+    phone?: string;
     password?: string;
     picture?: string;
+    fcmToken?: string;
+    coord?: ICoord;
     isDeleted?: boolean;
     isActive?: IsActive;
     isVerified?: boolean;
-    hasService?: boolean;
+    totalStays?: number;
+    averageRating?: number;
+    language?: string;
+    currency?: string;
+    bio?: string;
+    birthday?: Date;
+    education?: string;
+    profession?: string;
+    languages?: string[];
+    hostingStyle?: string[];
+    payoutMethod?: Types.ObjectId;
     otp?: string;
     role: Role;
     auths: IAuthProvider[];
-    service?: Types.ObjectId;
-    reviews?: Types.ObjectId[];
-    messages?: Types.ObjectId[];
     createdAt?: Date;
-    fcmToken?: string;
-    coord?: ICoord;
-    subscriptionInfo?: ISubscriptionInfo;
+    updatedAt?: Date;
 }

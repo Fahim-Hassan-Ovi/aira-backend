@@ -70,7 +70,7 @@ const verifyUser = catchAsync(async (req: Request, res: Response) => {
   sendResponse(res, {
     success: true,
     statusCode: 200,
-    message: 'User verified successfuly!',
+    message: 'User verified successfully!',
     data: {
       data: result,
     },

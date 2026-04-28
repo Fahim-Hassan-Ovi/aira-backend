@@ -14,7 +14,7 @@ import { sendEmail } from "../../utils/sendEmail";
 const createUser = async (payload: Partial<IUser>) => {
 
     const { email, password, ...rest } = payload;
-    // console.log(email, password);
+
     const isUserExist = await User.findOne({ email });
 
     if (isUserExist) {
@@ -181,7 +181,7 @@ const resendOTPService = async (email: string) => {
 
 const updateUser = async (userId: string, payload: Partial<IUser>, decodedToken: JwtPayload) => {
 
-    if (decodedToken.role === Role.USER) {
+    if (decodedToken.role === Role.GUEST) {
         if (userId !== decodedToken.userId) {
             throw new AppError(401, "You are not authorized")
         }
@@ -193,21 +193,21 @@ const updateUser = async (userId: string, payload: Partial<IUser>, decodedToken:
         throw new AppError(httpStatus.NOT_FOUND, "User not found")
     }
 
-    if (decodedToken.role === Role.PROVIDER && ifUserExist.role === Role.SUPER_ADMIN) {
+    if (decodedToken.role === Role.HOST && ifUserExist.role === Role.ADMIN) {
         throw new AppError(401, "You are not authorized")
     }
 
     if (payload.role) {
-        if (decodedToken.role === Role.USER) {
+        if (decodedToken.role === Role.GUEST) {
             throw new AppError(httpStatus.FORBIDDEN, "You are not authorized");
         }
-        if (payload.role === Role.SUPER_ADMIN && decodedToken.role === Role.PROVIDER) {
+        if (payload.role === Role.ADMIN && decodedToken.role === Role.HOST) {
             throw new AppError(httpStatus.FORBIDDEN, "You are not authorized");
         }
     }
 
     if (payload.isActive || payload.isDeleted || payload.isVerified) {
-        if (decodedToken.role === Role.USER) {
+        if (decodedToken.role === Role.GUEST) {
             throw new AppError(httpStatus.FORBIDDEN, "You are not authorized")
         }
     }
@@ -217,22 +217,6 @@ const updateUser = async (userId: string, payload: Partial<IUser>, decodedToken:
     return newUpdatedUser;
 }
 
-// // My code 
-// const getAllUsers = async () => {
-//     const users = await User.find({});
-
-//     const totalUsers = await User.countDocuments();
-
-//     return {
-//         data: users,
-//         meta: {
-//             total: totalUsers
-//         }
-//     };
-// }
-
-
-// From PH code
 const getAllUsers = async (query: Record<string, string>) => {
 
     const queryBuilder = new QueryBuilder(User.find(), query)

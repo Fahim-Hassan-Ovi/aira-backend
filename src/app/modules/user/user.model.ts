@@ -1,5 +1,5 @@
 import { model, Schema } from "mongoose";
-import { IAuthProvider, IsActive, IUser, Role } from "./user.interface";
+import { IAuthProvider, IsActive, ICoord, IUser, Role } from "./user.interface";
 
 const authProviderSchema = new Schema<IAuthProvider>({
     provider: { type: String, required: true },
@@ -9,16 +9,27 @@ const authProviderSchema = new Schema<IAuthProvider>({
     _id: false
 })
 
+const coordSchema = new Schema<ICoord>({
+    lat: { type: Number, required: true },
+    lon: { type: Number, required: true }
+}, {
+    versionKey: false,
+    _id: false
+})
+
 const userSchema = new Schema<IUser>({
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
+    phone: { type: String },
     password: { type: String },
     role: {
         type: String,
         enum: Object.values(Role),
-        default: Role.USER
+        default: Role.GUEST,
     },
     picture: { type: String },
+    fcmToken: { type: String },
+    coord: coordSchema,
     isDeleted: { type: Boolean, default: false },
     isActive: {
         type: String,
@@ -26,53 +37,24 @@ const userSchema = new Schema<IUser>({
         default: IsActive.ACTIVE,
     },
     isVerified: { type: Boolean, default: false },
-    hasService: { type: Boolean, default: false },
-    otp: { type: String, default: 0 },
+    totalStays: { type: Number, default: 0 },
+    averageRating: { type: Number, default: 0 },
+    language: { type: String },
+    currency: { type: String },
+    bio: { type: String },
+    birthday: { type: Date },
+    education: { type: String },
+    profession: { type: String },
+    languages: [{ type: String }],
+    hostingStyle: [{ type: String }],
+    payoutMethod: { type: Schema.Types.ObjectId, ref: "PayoutMethod" },
+    otp: { type: String },
     auths: [authProviderSchema],
-    service: 
-        {
-            type: Schema.Types.ObjectId,
-            ref: "Service",
-        },
-    fcmToken: { type: String },
-    coord: {
-        type: { lat: { type: Number }, lon: { type: Number } },
-        _id: false,
-    },
-    subscriptionInfo: {
-        planName: {
-            type: String,
-            enum: ["free", "basic", "pro", "elite"],
-            default: "free",
-        },
-        badgeType: {
-            type: String,
-            enum: ["none", "active", "verified_pro", "elite"],
-            default: "none",
-        },
-        priorityScore: {
-            type: Number,
-            default: 0,
-        },
-        isFeatured: {
-            type: Boolean,
-            default: false,
-        },
-        analyticsType: {
-            type: String,
-            enum: ["none", "basic", "detailed"],
-            default: "none",
-        },
-        hasHighlightedProfileBorder: {
-            type: Boolean,
-            default: false,
-        },
-    },
 }, {
     timestamps: true,
     versionKey: false
 })
 
-userSchema.index({ location: "2dsphere" });
+userSchema.index({ coord: "2dsphere" });
 
 export const User = model<IUser>("User", userSchema);
